@@ -1,6 +1,6 @@
 # 202433-padsv
 
-Materiais públicos da disciplina de Prática Avançada de Data Science e Visualization (PADSV) - 2024-33 (3º Tri)
+Materiais públicos da disciplina de Prática Avançada de Data Science e Visualization (PADSV) - 2025-31 (1º Tri)
 
 ## Plano dos labs
 
@@ -19,5 +19,5 @@ Materiais públicos da disciplina de Prática Avançada de Data Science e Visual
 
 **Obs**: O plano poderá ser modificado com base no feedback de vocês.
 
-## [Slides](https://padsInsper.github.io/202433-padsv/slides/)
+## [Slides](https://padsInsper.github.io/202531-padsv/slides/)
 
