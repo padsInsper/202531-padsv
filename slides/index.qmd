@@ -135,6 +135,10 @@ knitr::include_graphics("img/ex01.png")
 library(ggplot2)
 
 olist |>
+  dplyr::group_by(types) |> 
+  dplyr::summarise(n = dplyr::n()) 
+
+olist |>
   dplyr::count(types) |>
   dplyr::mutate(types = forcats::fct_reorder(types, n)) |>
   dplyr::filter(n > 100) |>
@@ -154,8 +158,7 @@ olist |>
     panel.background = element_rect(fill = "gray20"),
     plot.background = element_rect(fill = "gray10"),
     text = element_text(family = "serif", colour = "white"),
-    axis.text = element_text(family = "serif", colour = "white"),
-    panel.grid.minor = element_blank()
+    axis.text = element_text(family = "serif", colour = "white")
   )
 
 ```
@@ -176,9 +179,11 @@ contagens = contagens.query('n > 100')
 
 contagens_list = contagens.set_index('types').index.tolist()
 
+contagens = contagens.copy()
+
 contagens['n'] = contagens['n'] / 1000
 contagens['lab'] = np.round(contagens['n'], 2)
-contagens['types'] = contagens['types']
+
 contagens['types'] = pd.Categorical(
   contagens['types'], categories=contagens_list[::-1]
 )
@@ -204,6 +209,231 @@ contagens['types'] = pd.Categorical(
     panel_grid_minor = element_blank()
   )
 )
+
+
+```
+
+
+```{python}
+import pandas as pd
+
+import matplotlib.pyplot as plt
+
+
+
+df = r.olist
+
+
+df.info()
+
+if 'types' in df.columns and 'payment_value' in df.columns:
+
+  payment_summary = df.groupby('types')['product_id'].count().sort_values(ascending=True)
+
+
+
+  payment_summary = payment_summary.loc[payment_summary > 100]
+
+  fig, ax = plt.subplots(figsize=(10, 5))
+
+  bars = ax.barh(payment_summary.index, payment_summary.values / 1000, color="lightblue")
+
+
+
+  for bar, value in zip(bars, payment_summary.values / 1000):
+
+    plt.text(bar.get_width() / 2,
+
+     bar.get_y() + bar.get_height() / 2, 
+
+     f"{value:.2f}",
+
+     va='center', ha='center', 
+
+     fontsize=10,
+
+     bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.2'))
+
+
+
+  ax.set_xlabel("Quantidade (milhares)", color='white', loc="center", labelpad=15)
+
+  ax.set_ylabel("Forma de Pagamento", color='white', loc="center", labelpad=15)
+
+
+
+  ax.set_title("Formas de pagamento mais comuns\nConsiderando tipos com mais de 100 observações",
+
+         color='white', loc='left')
+
+
+
+  ax.set_facecolor("#222222")
+
+  fig.patch.set_facecolor("#222222")
+
+  ax.spines['bottom'].set_color('white')
+
+  ax.spines['left'].set_color('white')
+
+  ax.tick_params(colors='white')
+
+
+
+  plt.text(ax.get_xlim()[1], -0.5, "Fonte: Olist", color="white", fontsize=10, ha="right")
+
+  plt.show()
+
+else:
+
+  print("Colunas não foram encontradas")
+
+
+```
+
+```{python}
+# Contar quantas vezes cada forma de pagamento aparece e converter para milhares
+
+contagem = df["types"].value_counts() / 1000
+
+
+
+# Filtrando as formas de pagamento com mais de 100 observações
+
+contagem = contagem[contagem * 1000 > 100]
+
+
+import seaborn as sns
+# Configuração do estilo escuro
+
+sns.set_theme(style="darkgrid", palette="muted")
+
+
+
+# Criando a figura
+
+fig, ax = plt.subplots(figsize=(12, 6))
+
+
+
+# Criando o gráfico de barras horizontal com mais espaço entre as barras
+
+bars = ax.barh(contagem.index, contagem.values, color="paleturquoise", height=0.7) # Ajuste 'height' para mais espaço
+
+
+
+# Adicionando rótulos nas barras (valores em milhares) no meio das barras
+
+for i, v in enumerate(contagem.values):
+
+  ax.text(v / 2, i, f"{v:.2f}", color="black", fontsize=12, ha="center", va="center",
+
+      bbox=dict(facecolor="white", edgecolor="black"), fontname="DejaVu Serif")
+
+
+
+# Ajustes do gráfico
+
+ax.set_xlabel("Quantidade (milhares)", fontsize=14, fontname="DejaVu Serif")
+
+ax.set_ylabel("Forma de pagamento", fontsize=14, fontname="DejaVu Serif", labelpad=20) # Aumenta o espaço entre o eixo Y e as barras
+
+ax.set_title("Formas de pagamento mais comuns \n Considerando tipos com mais de 100 observações",
+
+       fontsize=16, fontweight="bold", fontname="DejaVu Serif", loc="left", color="white") # Ajuste para título branco
+
+ax.invert_yaxis()
+
+
+
+# Ajustando o limite do eixo X para começar em -2
+
+ax.set_xlim(left=-2)
+
+
+
+# Adicionando a fonte no canto inferior direito
+
+plt.figtext(0.95, 0.02, "Fonte: Olist", fontsize=12, ha="right", color="black", fontname="DejaVu Serif")
+
+
+
+# Alterando o fundo do gráfico (somente a área do gráfico)
+
+fig.patch.set_facecolor("black")
+
+ax.set_facecolor("gray")
+
+
+
+# Remover bordas e ajustar cores
+
+ax.spines["top"].set_visible(False)
+
+ax.spines["right"].set_visible(False)
+
+ax.spines["left"].set_color("white") # Ajuste para bordas brancas
+
+ax.spines["bottom"].set_color("white") # Ajuste para bordas brancas
+
+ax.xaxis.label.set_color("white") # Ajuste para rótulo branco
+
+ax.yaxis.label.set_color("white") # Ajuste para rótulo branco
+
+ax.title.set_color("white") # Ajuste para título branco
+
+ax.tick_params(axis="both", colors="white") # Ajuste para ticks brancos
+
+
+
+# Exibir o gráfico
+
+plt.show()
+
+
+```
+
+```{r}
+dados_pagamento <- data.frame(
+  forma_pagamento = c("credit_card", "boleto", "credit_card,voucher", "debit_card", "voucher"),
+  quantidade = c(83.95, 22.87, 2.49, 1.69, 1.66),
+  types = c("main", "alternative", "main", "alternative", "main")  # Adicionando a coluna types
+)
+
+# Criar o gráfico
+ggplot(dados_pagamento, aes(x = reorder(forma_pagamento, quantidade), y = quantidade)) +
+  geom_bar(stat = "identity", width = 0.6, fill = "#00CED1") +  # Todas as barras em verde água
+  geom_label(aes(label = scales::comma(quantidade), y = quantidade / 2), 
+             vjust = 0.5,  # Coloca o rótulo no centro da barra verticalmente
+             hjust = 0.5,  # Centraliza o rótulo horizontalmente
+             size = 3,  # Tamanho dos rótulos
+             color = "black", 
+             fontface = "bold",  # Texto em negrito
+             label.size = 0.5,  # Tamanho da borda
+             label.padding = unit(0.3, "lines"),  # Espaçamento interno da caixa
+             label.r = unit(0.15, "lines"),  # Arredondar os cantos da caixa
+             fill = "white") +  # Cor de fundo da caixa
+  coord_flip() +  # Inverter eixos (horizontal)
+  theme_minimal() +  # Tema mais clean
+  labs(
+    title = "Formas de pagamento mais comuns",
+    subtitle = "Considerando tipos com mais de 100 observações",
+    x = "Forma de pagamento",
+    y = "Quantidade (milhares)",
+    caption = "Fonte: Olist"
+  ) +
+  theme(
+    text = element_text(size = 14, color = "white"),  # Cor do texto branco
+    plot.background = element_rect(fill = "black", color = NA),  # Fundo preto
+    panel.background = element_rect(fill = "gray20", color = NA),  # Fundo do grid cinza
+    panel.grid.major = element_line(color = "white"),  # Linhas de grid brancas
+    panel.grid.minor = element_blank(),  # Remove grades menores
+    axis.text = element_text(color = "white"),  # Texto dos eixos branco
+    axis.title = element_text(color = "white"),  # Títulos dos eixos branco
+    plot.title = element_text(size = 18, face = "bold"),  # Título grande e em negrito
+    plot.subtitle = element_text(size = 14),  # Subtítulo
+    legend.position = "none"  # Remover legenda (não necessária)
+  )
 
 
 ```
@@ -284,6 +514,129 @@ olist |>
   )
 
 ```
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+
+
+# Carregar o dataset
+
+olist = pd.read_parquet("https://github.com/padsInsper/202433-padsv/releases/download/dados/olist_items.parquet")
+
+olist
+
+# Filtrar o intervalo de datas entre "2017-01-01" e "2018-07-01"
+
+olist['order_purchase_timestamp'] = pd.to_datetime(olist['order_purchase_timestamp'])
+
+olist_filtered = olist[
+
+  (olist['order_purchase_timestamp'] >= "2017-01-01") & (olist['order_purchase_timestamp'] <= "2018-07-01")
+
+]
+
+
+
+# Usar lubridate::floor_date() para aproximar datas (neste caso, arredondar para o início do mês)
+
+olist_filtered['month'] = olist_filtered['order_purchase_timestamp'].dt.to_period('M').dt.to_timestamp()
+
+
+
+# Reclassificar seller_state em categorias "RJ", "SP" e "Outros"
+
+olist_filtered['seller_state_grouped'] = olist_filtered['seller_state'].apply(
+
+  lambda x: x if x in ['RJ', 'SP'] else 'Outros'
+
+)
+
+
+
+# Contar/agrupar por data (mês) e estado
+
+grouped = olist_filtered.groupby(['month', 'seller_state_grouped']).size().reset_index(name='count')
+
+
+
+# Pivotar os dados para o formato necessário para o gráfico
+
+pivot_table = grouped.pivot(index='month', columns='seller_state_grouped', values='count').fillna(0)
+
+
+
+# Criar o gráfico
+
+plt.figure(figsize=(10, 8))
+
+
+
+# Plotando as linhas com as cores personalizadas
+
+plt.plot(pivot_table.index, pivot_table['SP'], label='SP', linewidth=2, color='#21908c')
+
+plt.plot(pivot_table.index, pivot_table['RJ'], label='RJ', linewidth=2, color='#414487')
+
+plt.plot(pivot_table.index, pivot_table['Outros'], label='Outros', linewidth=2, color='#7ad151')
+
+
+
+# Personalizar o gráfico
+
+plt.title("São Paulo tem mais vendas\nO que é esperado, pois a população é maior 😊", fontsize=14, loc='left')
+
+plt.xlabel("Data", fontsize=12)
+
+plt.ylabel("Quantidade", fontsize=12)
+
+
+
+# Ajustar o formato do eixo X para mostrar apenas alguns meses
+
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b \n %Y')) # Formato 'mar \n 2017'
+
+plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=3)) # Mostra rótulos a cada 3 meses
+
+
+
+# Ajustar os rótulos para ficarem retos
+
+plt.xticks(rotation=0)
+
+
+
+# Adicionar grid em formato de quadrados (linhas fracas)
+
+plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.3)
+
+
+
+# Ajustar o layout
+
+plt.tight_layout()
+
+
+
+# Adicionar rodapé com a fonte dos dados
+
+plt.figtext(0.95, -0.05, "Fonte: Olist", fontsize=10, color="black", ha="right")
+
+
+
+# Ajustar a posição da legenda para ficar abaixo do gráfico
+
+plt.legend(title='Estado', loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3)
+
+
+
+# Exibir o gráfico
+
+plt.show()
+```
+
 
 ```{python}
 #| eval: false
