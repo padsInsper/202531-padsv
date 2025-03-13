@@ -11,7 +11,6 @@ Materiais públicos da disciplina de Prática Avançada de Data Science e Visual
     - exercícios ggplot2 de otimização visual
     - extensões do ggplot2
 - **Lab 03** (12/03 19h00-22h30, remota):
-    - quarto dashboard
     - shiny
 - **Lab 04**:
     - (02/04 19h00-22h30, remota): Tópicos extras, como deploy e github
